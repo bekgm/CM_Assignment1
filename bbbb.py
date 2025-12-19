@@ -4,16 +4,21 @@ import cmath
 # 1. Bisection Method
 def bisection(f, a, b, eps=1e-6, Nmax=100):
     fa, fb = f(a), f(b)
+
+    # Root must be bracketed
     if fa * fb > 0:
         return "Error: f(a) and f(b) must have opposite signs"
 
     for _ in range(Nmax):
+        # Midpoint of the interval
         c = (a + b) / 2
         fc = f(c)
 
+        # Stop if function value or interval is small enough
         if abs(fc) < eps or (b - a) / 2 < eps:
             return c
 
+        # Keep the subinterval that contains the root
         if fa * fc < 0:
             b, fb = c, fc
         else:
@@ -21,29 +26,40 @@ def bisection(f, a, b, eps=1e-6, Nmax=100):
 
     return "Failed to converge"
 
+
 # 2. Fixed-Point Method
 def fixed_point(g, x0, eps=1e-6, Nmax=100):
     x = x0
+
     for _ in range(Nmax):
         x_new = g(x)
+
+        # Stop when successive approximations are close
         if abs(x_new - x) < eps:
             return x_new
+
         x = x_new
+
     return "Failed to converge"
 
 # 3. Newton–Raphson Method
 def newton_raphson(f, df, x0, eps=1e-6, Nmax=100):
     x = x0
+
     for _ in range(Nmax):
         fx = f(x)
         dfx = df(x)
 
+        # Avoid division by zero
         if dfx == 0:
             return "Error: derivative is zero"
 
+        # Newton update formula
         x_new = x - fx / dfx
+
         if abs(x_new - x) < eps:
             return x_new
+
         x = x_new
 
     return "Failed to converge"
@@ -53,13 +69,17 @@ def secant(f, x0, x1, eps=1e-6, Nmax=100):
     f0, f1 = f(x0), f(x1)
 
     for _ in range(Nmax):
+        # Prevent division by zero
         if f1 - f0 == 0:
             return "Error: division by zero"
 
+        # Secant update formula
         x2 = x1 - f1 * (x1 - x0) / (f1 - f0)
+
         if abs(f(x2)) < eps:
             return x2
 
+        # Shift points for next iteration
         x0, x1 = x1, x2
         f0, f1 = f1, f(x1)
 
@@ -68,16 +88,20 @@ def secant(f, x0, x1, eps=1e-6, Nmax=100):
 # 5. False Position Method
 def false_position(f, a, b, eps=1e-6, Nmax=100):
     fa, fb = f(a), f(b)
+
+    # Root must be bracketed
     if fa * fb > 0:
         return "Error: f(a) and f(b) must have opposite signs"
 
     for _ in range(Nmax):
+        # Linear interpolation (x-intercept of the chord)
         c = (a * fb - b * fa) / (fb - fa)
         fc = f(c)
 
         if abs(fc) < eps:
             return c
 
+        # Update interval while keeping the root bracketed
         if fa * fc < 0:
             b, fb = c, fc
         else:
@@ -85,31 +109,40 @@ def false_position(f, a, b, eps=1e-6, Nmax=100):
 
     return "Failed to converge"
 
-# 6. Muller's Method
+# 6. Müller’s Method
 def muller(f, x0, x1, x2, eps=1e-6, Nmax=100):
     for _ in range(Nmax):
         y0, y1, y2 = f(x0), f(x1), f(x2)
 
+        # Step sizes
         h0 = x1 - x0
         h1 = x2 - x1
+
+        # Divided differences
         d0 = (y1 - y0) / h0
         d1 = (y2 - y1) / h1
 
+        # Quadratic coefficients
         a = (d1 - d0) / (h1 + h0)
         b = a * h1 + d1
         c = y2
 
+        # Discriminant (may be complex)
         D = cmath.sqrt(b**2 - 4*a*c)
+
+        # Choose denominator with larger magnitude for stability
         denom = b + D if abs(b + D) > abs(b - D) else b - D
 
         if denom == 0:
             return "Error: division by zero"
 
+        # Müller update
         x_new = x2 - (2 * c) / denom
 
         if abs(f(x_new)) < eps:
             return x_new
 
+        # Shift points
         x0, x1, x2 = x1, x2, x_new
 
     return "Failed to converge"
